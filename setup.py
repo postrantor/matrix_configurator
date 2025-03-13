@@ -20,8 +20,8 @@ setup(
         'jinja2'
     ],
     zip_safe=True,
-    maintainer='jiaqi.li1',
-    maintainer_email='jiaqi.li1@hirain.com',
+    maintainer='postrantor',
+    maintainer_email='postrantor@gmail.com',
     description='AF RED configurator tools',
     license='Hirain License',
     tests_require=['pytest'],
