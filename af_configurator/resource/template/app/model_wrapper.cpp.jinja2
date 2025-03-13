@@ -31,23 +31,41 @@ void ModelWrapper::terminate()
   model_->terminate();
 }
 
-void ModelWrapper::step2()
+// void ModelWrapper::step0()
+// {
+//   std::lock_guard<std::mutex> lg(mutex_);
+//   model_->step0();
+// }
+
+void ModelWrapper::step1()
 {
   std::lock_guard<std::mutex> lg(mutex_);
-  model_->step2();
+  model_->step1();
 }
 
-void ModelWrapper::step4()
-{
-  std::lock_guard<std::mutex> lg(mutex_);
-  model_->step4();
-}
+// void ModelWrapper::step2()
+// {
+//   std::lock_guard<std::mutex> lg(mutex_);
+//   model_->step2();
+// }
 
-void ModelWrapper::step5()
-{
-  std::lock_guard<std::mutex> lg(mutex_);
-  model_->step5();
-}
+// void ModelWrapper::step3()
+// {
+//   std::lock_guard<std::mutex> lg(mutex_);
+//   model_->step3();
+// }
+
+// void ModelWrapper::step4()
+// {
+//   std::lock_guard<std::mutex> lg(mutex_);
+//   model_->step4();
+// }
+
+// void ModelWrapper::step5()
+// {
+//   std::lock_guard<std::mutex> lg(mutex_);
+//   model_->step5();
+// }
 
 {% for input in model.inputs%}
 void ModelWrapper::set_{{input.name}}(

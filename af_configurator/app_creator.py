@@ -262,7 +262,7 @@ class SimulinkAppCreator(AppCreator):
         self.special_implementation = 'simulink_'
         self.sub_topics_of_397 = []
 
-    def create_from_dir(self, app_dir, topics_397, model_name='HAV3G_TDA4MultiThreads', model_class='EU260_MultiThreadsModelClass'):
+    def create_from_dir(self, app_dir, topics_397, model_name='agv_control_model', model_class='AGVControlModelClass'):
         self.sub_topics_of_397 = topics_397
         super().create_from_dir(app_dir)
         self.create_model(model_name, model_class)
@@ -296,11 +296,15 @@ class PerformanceTestAppCreator(AppCreator):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', help='input package dir', type=str)
+    parser.add_argument('--name', default='agv_control_model', help='input model file name', type=str)
+    parser.add_argument('--type', default='AGVControlModelClass', help='input class name', type=str)
     args = parser.parse_args()
 
     package_dir = args.input
+    model_name = args.name
+    model_class = args.type
     app_creator = AppCreator()
-    app_creator.create_from_dir(package_dir)
+    app_creator.create_from_dir(package_dir, '', model_name, model_class)
 
 
 if __name__ == '__main__':

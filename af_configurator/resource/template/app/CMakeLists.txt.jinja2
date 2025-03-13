@@ -18,6 +18,9 @@ find_package({{depend}} REQUIRED)
 file(GLOB_RECURSE src_files
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/
   src/*.cpp
+  src/block/*.cpp
+  src/convert/*.cpp
+  src/model/*.cpp
 )
 
 add_library({{package.library}} SHARED
@@ -27,6 +30,8 @@ add_library({{package.library}} SHARED
 target_include_directories({{package.name}} PUBLIC
   include
   include/block
+  include/convert
+  include/model
 )
 ament_target_dependencies({{package.name}}
   rclcpp

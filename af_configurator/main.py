@@ -21,15 +21,15 @@ def af_red_config_to_source_code():
 def af_red_config_to_simulink_source_code():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', help='input package dir', type=str)
-    parser.add_argument('--name', default='HAV3G_TDA4MultiThreads', help='input model file name', type=str)
-    parser.add_argument('--type', default='EU260_MultiThreadsModelClass', help='input class name', type=str)
+    parser.add_argument('--name', default='agv_control_model', help='input model file name', type=str)
+    parser.add_argument('--type', default='AGVControlModelClass', help='input class name', type=str)
     args = parser.parse_args()
 
     package_dir = args.input
     model_name = args.name
     model_class = args.type
     app_creator = SimulinkAppCreator()
-    app_creator.create_from_dir(package_dir, model_name, model_class)
+    app_creator.create_from_dir(package_dir, '', model_name, model_class)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,7 @@
 #include "{{interface.package}}/{{interface.category}}/{{interface.header}}.hpp"
 {% endfor %}
 
-class EU260_MultiThreadsModelClass;
+class {{model.type}};
 
 namespace af::simulink {
 class ModelWrapper
@@ -21,9 +21,12 @@ class ModelWrapper
 public:
   void initialize();
   void terminate();
-  void step2();
-  void step4();
-  void step5();
+  // void step0();
+  void step1();
+  // void step2();
+  // void step3();
+  // void step4();
+  // void step5();
 
 {% for input in model.inputs%}
   void set_{{input.name}}(
