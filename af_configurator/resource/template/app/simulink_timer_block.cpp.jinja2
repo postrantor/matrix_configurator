@@ -1,0 +1,19 @@
+{% extends 'app/timer_block.cpp.jinja2' %}
+
+{% block header %}
+#include "model_wrapper.hpp"
+using af::simulink::ModelWrapper;
+{% endblock %}
+
+{% block on_timer_implementation %}
+{% for output in block.outputs %}
+  {% if output.is_sub_topics_of_397 %}
+  {{output.type}} dds_msg_{{output.name}};
+  std::memcpy(&dds_msg_{{output.name}}, &ModelWrapper::get_instance()->get_{{output.name}}(), sizeof({{output.type}}));
+  auto dds_rc_{{output.name}} = dds_write(dds_writer_{{output.name}}_, &dds_msg_{{output.name}});
+  {% else %}
+  publisher_{{output.name}}_->publish(
+    ModelWrapper::get_instance()->get_{{output.name}}());
+  {% endif %}
+{% endfor %}
+{% endblock %}

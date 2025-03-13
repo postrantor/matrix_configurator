@@ -1,0 +1,11 @@
+{% extends 'app/composite_block.cpp.jinja2' %}
+
+{% block header %}
+#include "model_wrapper.hpp"
+using af::simulink::ModelWrapper;
+{% endblock %}
+
+
+{% block on_message_implementation %}
+    ModelWrapper::get_instance()->set_{{input.name}}(*msg);
+{% endblock %}

@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#ifndef {{block.file_name_prefix | upper}}_HPP_
+#define {{block.file_name_prefix | upper}}_HPP_
+
+#include "af/block/timer_block.hpp"
+{% if block.outputs %}
+#include "rclcpp/rclcpp.hpp"
+{% endif %}
+{% for interface in block.interfaces %}
+#include "{{interface.package}}/{{interface.category}}/{{interface.header}}.hpp"
+{% endfor %}
+
+using af::block::TimerBlock;
+
+class {{block.name}} : public TimerBlock
+{
+public:
+  bool on_init(const af::block::CustomerConfig & config) override;
+  bool on_timer() override;
+  void on_shutdown() override;
+{% if block.outputs %}
+
+private:
+{% for domain in block.output_domains%}
+  rclcpp::Node::SharedPtr node_domain_{{domain}}_;
+{% endfor %}
+{% if block.out_to_397%}
+{% for domain in block.output_domains%}
+  dds_entity_t dds_participant_{{domain}}_;
+  dds_entity_t dds_publisher_{{domain}}_;
+{% endfor %}
+{% endif %}
+{% for output in block.outputs %}
+  {% if output.is_sub_topics_of_397 %}
+  dds_entity_t dds_topic_{{output.name}}_;
+  dds_entity_t dds_writer_{{output.name}}_;
+  {% else %}
+  rclcpp::Publisher<{{output.package}}::{{output.category}}::{{output.type}}>::SharedPtr publisher_{{output.name}}_;
+  {% endif %}
+{% endfor %}
+{% endif %}
+};
+
+#endif  // {{block.file_name_prefix | upper}}_HPP_

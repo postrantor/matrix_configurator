@@ -1,0 +1,44 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#ifndef MODEL_WRAPPER_HPP_
+#define MODEL_WRAPPER_HPP_
+
+#include <mutex>
+
+#include "af/common/singleton.hpp"
+{% for interface in model.interfaces %}
+#include "{{interface.package}}/{{interface.category}}/{{interface.header}}.hpp"
+{% endfor %}
+
+class EU260_MultiThreadsModelClass;
+
+namespace af::simulink {
+class ModelWrapper
+{
+public:
+  void initialize();
+  void terminate();
+  void step2();
+  void step4();
+  void step5();
+
+{% for input in model.inputs%}
+  void set_{{input.name}}(
+    const {{input.package}}::{{input.category}}::{{input.type}} & msg);
+{% endfor %}
+
+{% for output in model.outputs%}
+  {{output.package}}::{{output.category}}::{{output.type}} get_{{output.name}}();
+{% endfor %}
+
+private:
+  DECLARE_SINGLETON(ModelWrapper);
+  {{model.type}} * model_;
+  mutable std::mutex mutex_;
+};
+}  // namespace af::simulink {
+
+#endif  // MODEL_WRAPPER_HPP_

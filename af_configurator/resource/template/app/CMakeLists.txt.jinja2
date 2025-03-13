@@ -1,0 +1,58 @@
+cmake_minimum_required(VERSION 3.8)
+project({{package.name}})
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(beatles REQUIRED)
+{% for depend in package.depends %}
+find_package({{depend}} REQUIRED)
+{% endfor %}
+
+file(GLOB_RECURSE src_files
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/
+  src/*.cpp
+)
+
+add_library({{package.library}} SHARED
+  ${src_files}
+)
+
+target_include_directories({{package.name}} PUBLIC
+  include
+  include/block
+)
+ament_target_dependencies({{package.name}}
+  rclcpp
+  beatles
+{% for depend in package.depends %}
+  {{depend}}
+{% endfor %}
+)
+
+install(
+  TARGETS {{package.name}}
+  LIBRARY DESTINATION "."
+)
+
+install(
+  FILES orchestration/manifest.yaml orchestration/orchestration.yaml
+  DESTINATION "."
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+if(CMAKE_CROSSCOMPILING)
+  include(${CMAKE_SOURCE_DIR}/af_project/project.cmake)
+endif()
+
+ament_package()

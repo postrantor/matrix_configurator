@@ -1,0 +1,34 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#include "{{block.file_name_prefix}}.hpp"
+
+#include <utility>
+{% block header %} {% endblock %}
+
+bool {{block.name}}::on_init(const af::block::CustomerConfig &)
+{
+  // init
+{% if block.inputs %}
+{% for input in block.inputs %}
+  auto on_{{input.name}} = [this](std::shared_ptr<const {{input.package}}::{{input.category}}::{{input.type}}> msg) {
+    {% block on_message_implementation scoped %}
+    // sub logic
+    {% endblock %}
+    return true;
+  };
+  add_sub_callback<{{loop.index0}}>(std::move(on_{{input.name}}));
+
+{% endfor %}
+{% endif %}
+  return true;
+}
+
+void {{block.name}}::on_shutdown()
+{
+  // shutdown
+}
+
+AF_REGISTER_BLOCK({{block.name}})

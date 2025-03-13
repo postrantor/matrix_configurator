@@ -1,0 +1,43 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#ifndef {{block.file_name_prefix | upper}}_HPP_
+#define {{block.file_name_prefix | upper}}_HPP_
+
+{% if block.inputs %}
+#include <memory>
+{% endif %}
+
+#include "af/block/composite_block.hpp"
+{% if block.outputs %}
+#include "rclcpp/rclcpp.hpp"
+{% endif %}
+{% for interface in block.interfaces %}
+#include "{{interface.package}}/{{interface.category}}/{{interface.header}}.hpp"
+{% endfor %}
+
+using af::block::CompositeBlock;
+using af::block::ServerSrv;
+using af::block::ClientSrv;
+using af::block::PubMsg;
+using af::block::SubMsg;
+
+class {{block.name}} : public CompositeBlock<
+ServerSrv<>,
+ClientSrv<>,
+SubMsg<{% for input in block.inputs %}
+{{input.package}}::{{input.category}}::{{input.type}}{% if not loop.last %}, {% endif %}
+{% endfor %}>,
+PubMsg<{% for output in block.outputs %}
+{{output.package}}::{{output.category}}::{{output.type}}{% if not loop.last %}, {% endif %}
+{% endfor %}>
+>
+{
+public:
+  bool on_init(const af::block::CustomerConfig & config) override;
+  void on_shutdown() override;
+};
+
+#endif  // {{block.file_name_prefix | upper}}_HPP_

@@ -1,0 +1,73 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#include "model_wrapper.hpp"
+
+#include "{{model.name}}.h"
+#include "af/common/singleton.hpp"
+{% for depend in model.depends %}
+#include "convert/{{depend}}/slros_busmsg_conversion.h"
+{% endfor %}
+
+namespace af::simulink {
+
+IMPLEMENT_SINGLETON(ModelWrapper)
+
+ModelWrapper::ModelWrapper() {
+  model_ = new {{model.type}}();
+}
+
+void ModelWrapper::initialize()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  model_->initialize();
+}
+
+void ModelWrapper::terminate()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  model_->terminate();
+}
+
+void ModelWrapper::step2()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  model_->step2();
+}
+
+void ModelWrapper::step4()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  model_->step4();
+}
+
+void ModelWrapper::step5()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  model_->step5();
+}
+
+{% for input in model.inputs%}
+void ModelWrapper::set_{{input.name}}(
+  const {{input.package}}::{{input.category}}::{{input.type}} & msg)
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  convertToBus(&model_->{{model.name}}_U.{{input.name}}, msg);
+}
+
+{% endfor %}
+
+{% for output in model.outputs%}
+{{output.package}}::{{output.category}}::{{output.type}} ModelWrapper::get_{{output.name}}()
+{
+  std::lock_guard<std::mutex> lg(mutex_);
+  {{output.package}}::{{output.category}}::{{output.type}} msg;
+  convertFromBus(msg, &model_->{{model.name}}_Y.{{output.name}});
+  return msg;
+}
+
+{% endfor %}
+
+}  // namespace af::simulink

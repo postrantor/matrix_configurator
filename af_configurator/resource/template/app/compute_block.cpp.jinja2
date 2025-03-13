@@ -1,0 +1,38 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#include "{{block.file_name_prefix}}.hpp"
+{% block header %} {% endblock %}
+
+bool {{block.name}}::on_init(const af::block::CustomerConfig &)
+{
+  // init
+{% if block.outputs %}
+  const auto & output_topics = get_output_topics();
+{% for output in block.outputs %}
+  publisher_{{output.name}}_ = node()->create_publisher<{{output.package}}::{{output.category}}::{{output.type}}>(output_topics[{{loop.index0}}].name, output_topics[{{loop.index0}}].qos);
+{% endfor %}
+{% endif %}
+{% block on_init_implementation %}{% endblock %}
+  return true;
+}
+{% if block.inputs %}
+
+bool {{block.name}}::on_message({% for input in block.inputs %}
+
+  const std::shared_ptr<const {{input.package}}::{{input.category}}::{{input.type}}> & msg{% if loop.length > 1 %}{{loop.index0}}{% endif %}{% if not loop.last %},{% endif %}
+{% endfor %})
+{
+{% block on_message_implementation %}{% endblock %}
+  return true;
+}
+{% endif %}
+
+void {{block.name}}::on_shutdown()
+{
+  // shutdown
+}
+
+AF_REGISTER_BLOCK({{block.name}})

@@ -1,0 +1,18 @@
+{% extends 'app/compute_block.cpp.jinja2' %}
+
+{% block header %}
+#include "model_wrapper.hpp"
+using af::simulink::ModelWrapper;
+{% endblock %}
+
+
+{% block on_message_implementation %}
+{% for input in block.inputs%}
+  ModelWrapper::get_instance()->set_{{input.name}}(*msg{% if loop.length > 1 %}{{loop.index0}}{% endif %});
+{% endfor %}
+
+{% for output in block.outputs %}
+  publisher_{{output.name}}_->publish(
+    ModelWrapper::get_instance()->get_{{output.name}}());
+{% endfor %}
+{% endblock %}

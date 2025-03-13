@@ -1,0 +1,45 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#ifndef {{block.file_name_prefix | upper}}_HPP_
+#define {{block.file_name_prefix | upper}}_HPP_
+
+{% if block.inputs %}
+#include <memory>
+{% endif %}
+
+#include "af/block/compute_block.hpp"
+{% if block.outputs %}
+#include "rclcpp/rclcpp.hpp"
+{% endif %}
+{% for interface in block.interfaces %}
+#include "{{interface.package}}/{{interface.category}}/{{interface.header}}.hpp"
+{% endfor %}
+
+using af::block::ComputeBlock;
+
+class {{block.name}} : public ComputeBlock<{% for input in block.inputs %}
+{{input.package}}::{{input.category}}::{{input.type}}{% if not loop.last %}, {% endif %}
+{% endfor %}>
+{
+public:
+  bool on_init(const af::block::CustomerConfig & config) override;
+{% if block.inputs %}
+  bool on_message({% for input in block.inputs %}
+
+    const std::shared_ptr<const {{input.package}}::{{input.category}}::{{input.type}}> & msg{% if loop.length > 1 %}{{loop.index0}}{% endif %}{% if not loop.last %},{% endif %}
+  {% endfor %}) override;
+{% endif %}
+  void on_shutdown() override;
+{% if block.outputs %}
+
+private:
+{% for output in block.outputs %}
+  rclcpp::Publisher<{{output.package}}::{{output.category}}::{{output.type}}>::SharedPtr publisher_{{output.name}}_;
+{% endfor %}
+{% endif %}
+};
+
+#endif  // {{block.file_name_prefix | upper}}_HPP_

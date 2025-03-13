@@ -1,0 +1,39 @@
+set(AF_PROJECT_NAME af_${PROJECT_NAME})
+set(CMAKE_AF_PROJECT_DIR ${CMAKE_SOURCE_DIR}/af_project)
+
+include(${CMAKE_AF_PROJECT_DIR}/CMakeCPack.cmake)
+find_package(Framework REQUIRED)
+
+include_directories(
+    ${FRAMEWORK_INCLUDE_DIR}
+)
+
+add_library(${AF_PROJECT_NAME}
+    SHARED
+    ${CMAKE_AF_PROJECT_DIR}/af_project.cpp
+)
+
+target_link_libraries(${AF_PROJECT_NAME}
+    ${FRAMEWORK_LIB}
+)
+
+set_target_properties(${AF_PROJECT_NAME} PROPERTIES OUTPUT_NAME app PREFIX "")
+
+add_dependencies(${AF_PROJECT_NAME} ${PROJECT_NAME})
+
+add_custom_command(
+    TARGET ${AF_PROJECT_NAME}
+    PRE_BUILD
+    COMMAND rm -f ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.apk
+    VERBATIM)
+
+add_custom_command(
+    TARGET ${AF_PROJECT_NAME}
+    POST_BUILD
+    COMMAND afpt ${CMAKE_AF_PROJECT_DIR}/manifest.xml ${CMAKE_BINARY_DIR}/app.so ${CMAKE_BINARY_DIR}/manifest.xml
+    COMMAND cpack
+    COMMAND mv ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.zip ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.apk
+    VERBATIM)
+
+install(FILES ${CMAKE_BINARY_DIR}/app.so COMPONENT application DESTINATION ".")
+install(FILES ${CMAKE_BINARY_DIR}/manifest.xml COMPONENT application DESTINATION ".")

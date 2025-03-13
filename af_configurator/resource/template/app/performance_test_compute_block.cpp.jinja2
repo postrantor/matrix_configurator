@@ -1,0 +1,7 @@
+{% extends 'app/compute_block.cpp.jinja2' %}
+
+{% block on_init_implementation %}
+{% for input in block.inputs%}
+  AF_INFO(node()->get_logger()) << "{{input.name}}: " << sizeof({{input.package}}::{{input.category}}::{{input.type}});
+{% endfor %}
+{% endblock %}

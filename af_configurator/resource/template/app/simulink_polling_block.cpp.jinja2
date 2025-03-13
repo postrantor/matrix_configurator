@@ -1,0 +1,15 @@
+{% extends 'app/polling_block.cpp.jinja2' %}
+
+{% block header %}
+#include "model_wrapper.hpp"
+using af::simulink::ModelWrapper;
+{% endblock %}
+
+
+{% block on_message_implementation %}
+{% for input in block.inputs%}
+  if (!msg{{loop.index0}}.empty()) {
+    ModelWrapper::get_instance()->set_{{input.name}}(*msg{{loop.index0}}.back());
+  }
+{% endfor %}
+{% endblock %}

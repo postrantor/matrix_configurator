@@ -1,0 +1,80 @@
+/*
+ * Copyright (C) 2025 Hirain Technologies - All Rights Reserved
+ *
+ */
+
+#include "{{block.file_name_prefix}}.hpp"
+{% block header %} {% endblock %}
+
+bool {{block.name}}::on_init(const af::block::CustomerConfig &)
+{
+  // init
+{% if block.outputs %}
+  const auto & output_topics = get_output_topics();
+
+{% for domain in block.output_domains%}
+  auto context_domain_{{domain}} = std::make_shared<rclcpp::Context>();
+  rclcpp::InitOptions options_domain_{{domain}};
+  options_domain_{{domain}}.auto_initialize_logging(false).set_domain_id({{domain}});
+  context_domain_{{domain}}->init(0, nullptr, options_domain_{{domain}});
+  node_domain_{{domain}}_ = rclcpp::Node::make_shared("node_domain_{{domain}}_period_task", rclcpp::NodeOptions{}.context(context_domain_{{domain}}));
+{% endfor %}
+
+{% if block.out_to_397%}
+auto qos = dds_create_qos();
+{% for domain in block.output_domains%}
+  dds_participant_{{domain}}_ = dds_create_participant({{domain}}, NULL, NULL);
+  if (dds_participant_{{domain}}_ < 0)
+  {
+      DDS_FATAL(
+          "dds_create_dds_participant_{{domain}}_: %s\n",
+          dds_strretcode(-dds_participant_{{domain}}_));
+  }
+
+  dds_publisher_{{domain}}_ = dds_create_publisher(
+      dds_publisher_{{domain}}_,
+      qos, NULL);
+  if (dds_publisher_{{domain}}_ < 0)
+  {
+      DDS_FATAL(
+          "dds_create_dds_publisher_{{domain}}_: %s\n",
+          dds_strretcode(-dds_publisher_{{domain}}_));
+  }
+{% endfor %}
+{% endif %}
+
+{% for output in block.outputs %}
+  {% if output.is_sub_topics_of_397 %}
+  dds_topic_{{output.name}}_ = dds_create_topic(dds_participant_{{output.domain_id}}_, &{{output.type}}_desc, "{{output.name}}", NULL, NULL);
+  if (dds_topic_{{output.name}}_ < 0){
+  DDS_FATAL("dds_create_dds_topic_{{output.name}}_: %s\n", dds_strretcode(-dds_topic_{{output.name}}_));
+  }
+  auto dds_writer_{{output.name}}_qos = dds_create_qos();
+  dds_qset_durability(dds_writer_{{output.name}}_qos, DDS_DURABILITY_{{output.qos.durability|upper}});
+  dds_qset_history(dds_writer_{{output.name}}_qos, DDS_HISTORY_{{output.qos.history|upper}}, {{output.qos.depth}});
+  dds_qset_deadline(dds_writer_{{output.name}}_qos, {{output.qos.deadline}}*1000000);
+  dds_qset_liveliness(dds_writer_{{output.name}}_qos, DDS_LIVELINESS_{{output.qos.liveliness|upper}}, DDS_INFINITY);
+  dds_qset_ownership(dds_writer_{{output.name}}_qos, DDS_OWNERSHIP_{{output.qos.ownership|upper}});
+  dds_qset_reliability(dds_writer_{{output.name}}_qos, DDS_RELIABILITY_{{output.qos.reliability|upper}}, 1000000000);
+  dds_writer_{{output.name}}_ = dds_create_writer(dds_participant_{{output.domain_id}}_, dds_topic_{{output.name}}_, dds_writer_{{output.name}}_qos, NULL);
+  {% else %}
+  publisher_{{output.name}}_ = node_domain_{{output.domain_id}}_->create_publisher<{{output.package}}::{{output.category}}::{{output.type}}>(output_topics[{{loop.index0}}].name, output_topics[{{loop.index0}}].qos);
+  {% endif %}
+{% endfor %}
+{% endif %}
+  return true;
+}
+
+bool {{block.name}}::on_timer()
+{
+  // timer task
+{% block on_timer_implementation %}{% endblock %}
+  return true;
+}
+
+void {{block.name}}::on_shutdown()
+{
+  // shutdown
+}
+
+AF_REGISTER_BLOCK({{block.name}})
